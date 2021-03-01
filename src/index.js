@@ -1,6 +1,9 @@
 import ace from 'ace-builds'
 import 'ace-builds/src-noconflict/mode-python.js'
 
+import { CodeNode } from './code-tree.js'
+
+
 export default {
   id: 'revealjs-ace-brython',
   init: (deck) => {
@@ -48,34 +51,11 @@ class Plugin {
       code = container.textContent;
     }
 
-    code = removeLeadingSpaces(code)
-    container.textContent = code
+    const codeNode = new CodeNode(null, code)
+    container.textContent = codeNode.code
 
     ace.edit(container, {
       mode: 'ace/mode/python',
     })
   }
-}
-
-
-function removeLeadingSpaces(code) {
-  const lines = code.split(/\r?\n/)
-  const r = []
-  let firstIndent = null
-  for (let line of lines) {
-    if (!/\S/.test(line)) {
-      continue
-    }
-    line = line.trimEnd()
-    if (firstIndent === null) {
-      firstIndent = /^\s*/.exec(line)[0]
-    } else {
-      if (line.startsWith(firstIndent)) {
-        throw new Error('missing same indent starting line')
-      }
-    }
-    line = line.slice(firstIndent.length)
-    r.push(line)
-  }
-  return r.join('\n')
 }
