@@ -1,0 +1,21 @@
+{
+  "name": "revealjs-ace-brython",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Revealjs plugin that integrates Ace editor with Brython",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "keywords": [
+    "revealjs",
+    "ace",
+    "brython"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "webpack": "^5.24.2",
+    "webpack-cli": "^4.5.0"
+  }
+}
