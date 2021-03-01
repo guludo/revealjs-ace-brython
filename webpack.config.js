@@ -5,7 +5,7 @@ module.exports = {
   output: {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist'),
-    library: 'RevealjsAceBrython',
+    library: 'RevealAceBrython',
     libraryTarget: 'umd',
   },
 }
