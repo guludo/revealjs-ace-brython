@@ -110,9 +110,6 @@ class CodeNode {
 }
 
 
-export { CodeNode }
-
-
 function preprocess(code) {
   let [lines, firstLine] = trimBlankLines(code.split(/\r?\n/))
 
