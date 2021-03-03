@@ -17,9 +17,11 @@ export default {
   }),
 }
 
+
 const defaultConfig = {
   selector: '.ace-brython',
 }
+
 
 class Plugin {
   constructor(deck, config) {
