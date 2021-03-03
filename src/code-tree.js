@@ -65,6 +65,8 @@ class CodeTree {
   }
 }
 
+export default CodeTree
+
 
 class CodeNode {
   constructor(parent, code) {
