@@ -83,6 +83,28 @@ class CodeNode {
     path.reverse()
     return path
   }
+
+  async exec(stdoutCallback) {
+    if (this.parent) {
+      await this.parent.exec()
+    }
+
+    let stdout = ''
+    let t0 = new Date()
+    // TODO: integrate with brython here
+    stdoutCallback('foo\n')
+    stdout += 'foo\n'
+
+    stdoutCallback('bar\n')
+    stdout += 'bar\n'
+
+    stdoutCallback(null)
+
+    return {
+      stdout,
+      time: (new Date() - t0) / 1000,
+    }
+  }
 }
 
 
