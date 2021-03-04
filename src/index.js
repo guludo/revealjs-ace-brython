@@ -1,7 +1,5 @@
-import ace from 'ace-builds'
-import 'ace-builds/src-noconflict/mode-python.js'
-
 import CodeTree from './code-tree.js'
+import Editor from './editor.js'
 
 
 export default {
@@ -93,9 +91,6 @@ class Plugin {
     }
     const node = this.scriptToCodeNode.get(scriptElement)
     container.textContent = node.code
-
-    ace.edit(container, {
-      mode: 'ace/mode/python',
-    })
+    const editor = new Editor(container, node)
   }
 }
