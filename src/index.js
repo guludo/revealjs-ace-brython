@@ -90,7 +90,6 @@ class Plugin {
       return
     }
     const node = this.scriptToCodeNode.get(scriptElement)
-    container.textContent = node.code
     const editor = new Editor(container, node)
   }
 }
