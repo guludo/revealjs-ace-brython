@@ -1,0 +1,58 @@
+<style>
+#root {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    /* Copying from Ace's font-family */
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace
+}
+
+#editor-container {
+    flex: 1;
+}
+
+#buttons {
+    flex: none;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#buttons > * {
+    margin-left: 1ex;
+}
+
+button {
+    all: unset;
+    font-size: .7em;
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+}
+
+button > img {
+    height: 1.1em;
+}
+
+button > span {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all .5s;
+}
+
+button:hover > span {
+    max-width: 10ex;
+    opacity: 1;
+}
+
+</style>
+
+<div id='root'>
+    <div id='editor-container'>
+        <slot name='editor' />
+    </div>
+    <div id='buttons'>
+        <button><img src='./clear.svg' alt='Reset Icon' /><span>Reset</span></button>
+        <button><img src='./play-arrow.svg' alt='Run Icon' /><span>Run</span></button>
+    </div>
+</div>
