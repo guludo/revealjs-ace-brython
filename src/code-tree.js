@@ -73,6 +73,8 @@ class CodeNode {
     this.id = null
     this.parent = parent
     this.code = code ? preprocess(code) : null
+    this.originalCode = this.code
+    this.codeChangeCallbacks = new Set()
   }
 
   getPath() {
@@ -106,6 +108,36 @@ class CodeNode {
       stdout,
       time: (new Date() - t0) / 1000,
     }
+  }
+
+  resetCode(skipThisCallback) {
+    this.setCode(this.originalCode, skipThisCallback)
+  }
+
+  setCode(code, skipThisCallback) {
+    if (code === this.code) {
+      return
+    }
+    this.code = code
+
+    for (let cb of this.codeChangeCallbacks) {
+      if (cb === skipThisCallback) {
+        continue
+      }
+      try {
+        cb(this.code, this)
+      } catch (e) {
+        console.error(`Error while calling code change callback: ${e}`)
+      }
+    }
+  }
+
+  addCodeChangeCallback(callback) {
+    this.codeChangeCallbacks.add(callback)
+  }
+
+  removeCodeChangeCallback(callback) {
+    this.codeChangeCallbacks.delete(callback)
   }
 }
 
