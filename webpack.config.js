@@ -9,4 +9,12 @@ module.exports = {
     libraryExport: 'default',
     libraryTarget: 'umd',
   },
+   module: {
+    rules: [
+      {
+        test: /\.html$/i,
+        loader: 'html-loader',
+      },
+    ],
+  },
 }
