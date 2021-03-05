@@ -40,6 +40,9 @@ class Editor {
 
     this.root = shadow.getElementById('root')
     this.clearButton = shadow.getElementById('clear-button')
+    this.clearButton.onclick = () => {
+      this.codeNode.resetCode()
+    }
   }
 
   update() {
