@@ -37,6 +37,14 @@ class Editor {
       this.codeNode.setCode(this.aceEditor.getValue())
       codeNodeChangeSkipSetValue = false
     })
+    this.aceEditor.commands.addCommand({
+      name: 'runcode',
+      bindKey: {win: 'Ctrl-Enter',  mac: 'Command-Enter'},
+      exec: () => {
+        this.runButton.click()
+      },
+    })
+
 
     this.root = shadow.getElementById('root')
 
