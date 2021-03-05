@@ -10,8 +10,12 @@ class Editor {
   constructor(container, codeNode) {
     this.codeNode = codeNode
 
+    let codeNodeChangeSkipSetValue = false
     this.handleCodeNodeChange = (code) => {
-      this.aceEditor.setValue(code)
+      if (!codeNodeChangeSkipSetValue) {
+        this.aceEditor.setValue(code)
+      }
+      this.update()
     }
     this.codeNode.addCodeChangeCallback(this.handleCodeNodeChange)
 
@@ -29,8 +33,17 @@ class Editor {
       mode: 'ace/mode/python',
     })
     this.aceEditor.on('change', () => {
-      this.codeNode.setCode(this.aceEditor.getValue(), this.handleCodeNodeChange)
+      codeNodeChangeSkipSetValue = true
+      this.codeNode.setCode(this.aceEditor.getValue())
+      codeNodeChangeSkipSetValue = false
     })
+
+    this.root = shadow.getElementById('root')
+    this.clearButton = shadow.getElementById('clear-button')
+  }
+
+  update() {
+    this.root.classList.toggle('edited', this.codeNode.code !== this.codeNode.originalCode)
   }
 
   destroy() {

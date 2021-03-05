@@ -21,6 +21,14 @@
     margin-left: 1ex;
 }
 
+#clear-button {
+    display: none;
+}
+
+.edited #clear-button {
+    display: flex;
+}
+
 button {
     all: unset;
     font-size: .7em;
@@ -52,7 +60,7 @@ button:hover > span {
         <slot name='editor' />
     </div>
     <div id='buttons'>
-        <button><img src='./clear.svg' alt='Reset Icon' /><span>Reset</span></button>
+        <button id='clear-button'><img src='./clear.svg' alt='Reset Icon' /><span>Reset</span></button>
         <button><img src='./play-arrow.svg' alt='Run Icon' /><span>Run</span></button>
     </div>
 </div>
