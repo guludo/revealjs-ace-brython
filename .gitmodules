@@ -1,0 +1,3 @@
+[submodule "brython-runner"]
+	path = brython-runner
+	url = https://github.com/guludo/brython-runner.git
