@@ -52,6 +52,7 @@ class Editor {
   destroy() {
     this.aceEditor.destroy()
     this.codeNode.removeCodeChangeCallback(this.handleCodeNodeChange)
+    this.container.innerHTML = ''
   }
 }
 
