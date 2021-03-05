@@ -53,6 +53,7 @@ class Editor {
     this.aceEditor.destroy()
     this.codeNode.removeCodeChangeCallback(this.handleCodeNodeChange)
     this.container.innerHTML = ''
+    Object.keys(this).forEach(k => delete this[k])
   }
 }
 
