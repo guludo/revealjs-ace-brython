@@ -39,9 +39,29 @@ class Editor {
     })
 
     this.root = shadow.getElementById('root')
+
+    this.output = shadow.getElementById('output')
+
     this.clearButton = shadow.getElementById('clear-button')
     this.clearButton.onclick = () => {
       this.codeNode.resetCode()
+    }
+
+    this.runButton = shadow.getElementById('run-button')
+    this.runButton.onclick = async () => {
+      this.runButton.disabled = true
+      this.runButton.querySelector('span').textContent = 'Running...'
+      this.root.classList.toggle('running', true)
+      this.output.textContent = ''
+      const result = await this.codeNode.exec((partialOut) => {
+        if (partialOut == null) {
+          return
+        }
+        this.output.textContent += partialOut
+      })
+      this.runButton.disabled = false
+      this.runButton.querySelector('span').textContent = 'Run'
+      this.root.classList.toggle('running', false)
     }
   }
 

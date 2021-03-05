@@ -48,11 +48,19 @@ button > span {
     transition: all .5s;
 }
 
+.running #run-button > span,
 button:hover > span {
     max-width: 10ex;
     opacity: 1;
 }
 
+#output {
+    white-space: pre;
+    font-size: .8em;
+    text-align: left;
+    background: #ccc6;
+    padding: 1ex;
+}
 </style>
 
 <div id='root'>
@@ -61,6 +69,7 @@ button:hover > span {
     </div>
     <div id='buttons'>
         <button id='clear-button'><img src='./clear.svg' alt='Reset Icon' /><span>Reset</span></button>
-        <button><img src='./play-arrow.svg' alt='Run Icon' /><span>Run</span></button>
+        <button id='run-button'><img src='./play-arrow.svg' alt='Run Icon' /><span>Run</span></button>
     </div>
+    <div id='output'></div>
 </div>
