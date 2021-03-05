@@ -96,13 +96,22 @@ class CodeNode {
     let stdout = ''
     let t0 = new Date()
     // TODO: integrate with brython here
-    stdoutCallback('foo\n')
-    stdout += 'foo\n'
+    await new Promise(resolve => {
+      setTimeout(() => {
+        stdoutCallback('foo\n')
+        stdout += 'foo\n'
+        resolve()
+      }, 1000)
+    })
 
-    stdoutCallback('bar\n')
-    stdout += 'bar\n'
-
-    stdoutCallback(null)
+    await new Promise(resolve => {
+      setTimeout(() => {
+        stdoutCallback('bar\n')
+        stdout += 'bar\n'
+        stdoutCallback(null)
+        resolve()
+      }, 1000)
+    })
 
     return {
       stdout,
