@@ -8,7 +8,8 @@
 }
 
 #editor-container {
-    flex: 1;
+    flex: 2;
+    min-height: 4em;
 }
 
 #buttons {
@@ -54,12 +55,18 @@ button:hover > span {
     opacity: 1;
 }
 
+.running #run-button > img {
+    opacity: 0;
+}
+
 #output {
     white-space: pre;
     font-size: .8em;
     text-align: left;
     background: #ccc6;
     padding: 1ex;
+    overflow: auto;
+    min-height: 2em;
 }
 
 .stderr {
