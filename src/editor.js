@@ -74,6 +74,7 @@ class Editor {
     this.aceElement.textContent = this.codeNode.code
     this.aceEditor = ace.edit(this.aceElement, {
       mode: 'ace/mode/python',
+      hasCssTransforms: true,
     })
     this.aceEditor.on('change', () => {
       this.codeNodeChangeSkipSetValue = true
