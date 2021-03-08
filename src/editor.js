@@ -9,10 +9,7 @@ EditorTemplate.innerHTML = EditorTemplateHtml
 class Editor {
   constructor(container, codeNode) {
     this.codeNode = codeNode
-
-    this.state = {
-      running: false,
-    }
+    this.state = {}
 
     this.container = container
 
@@ -54,7 +51,13 @@ class Editor {
       }
     }
 
+    this.state.nodeState = this.codeNode.state
+    this.handleNodeStateChange = (state) => {
+      this.update({nodeState: state})
+    }
+
     this.codeNode.addCodeChangeCallback(this.handleCodeNodeChange)
+    this.codeNode.addStateChangeCallback(this.handleNodeStateChange)
     this.codeNode.stdout.subscribe(this.handleNodeStdout)
     this.codeNode.stderr.subscribe(this.handleNodeStderr)
   }
@@ -96,28 +99,26 @@ class Editor {
     }
 
     this.runButton = shadow.getElementById('run-button')
-    this.runButton.onclick = async () => {
-      this.update({running: true})
-      try {
-        await this.codeNode.exec()
-      } finally {
-        this.update({running: false})
-      }
+    this.runButton.onclick = () => {
+      this.codeNode.exec()
     }
   }
 
   update(stateUpdate) {
     this.state = {...this.state, ...stateUpdate}
 
+    const running = this.state.nodeState === 'running'
+
     this.root.classList.toggle('edited', this.codeNode.code !== this.codeNode.originalCode)
-    this.runButton.disabled = this.state.running
-    this.runButton.querySelector('span').textContent = this.state.running ? 'Running...' : 'Run'
-    this.root.classList.toggle('running', this.state.running)
+    this.runButton.disabled = running
+    this.runButton.querySelector('span').textContent = running ? 'Running...' : 'Run'
+    this.root.classList.toggle('running', running)
   }
 
   destroy() {
     this.aceEditor.destroy()
     this.codeNode.removeCodeChangeCallback(this.handleCodeNodeChange)
+    this.codeNode.removeStateChangeCallback(this.handleNodeStateChange)
     this.codeNode.stdout.unsubscribe(this.handleNodeStdout)
     this.codeNode.stderr.unsubscribe(this.handleNodeStderr)
     this.container.innerHTML = ''
