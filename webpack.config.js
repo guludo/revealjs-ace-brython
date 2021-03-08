@@ -9,6 +9,7 @@ module.exports = {
     libraryExport: 'default',
     libraryTarget: 'umd',
   },
+  devtool: 'eval-source-map',
    module: {
     rules: [
       {
