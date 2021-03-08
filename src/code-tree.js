@@ -78,11 +78,13 @@ class CodeNode {
     this.id = null
     this.parent = parent
     this.code = code ? preprocess(code) : null
+    this.state = 'idle'
     this.originalCode = this.code
     this.stdout = new Output()
     this.stderr = new Output()
     this.runner = runner
     this.codeChangeCallbacks = new Set()
+    this.stateChangeCallbacks = new Set()
   }
 
   getPath() {
@@ -105,7 +107,12 @@ class CodeNode {
     }
     nodes.reverse()
 
+    if (nodes.some(n => n.state !== 'idle')) {
+      throw new Error('not all nodes in the chain are idle')
+    }
+
     for (let node of nodes) {
+      node.setState('running')
       node.stdout.reset()
       node.stderr.reset()
     }
@@ -119,7 +126,13 @@ class CodeNode {
       },
     }
 
-    await this.runner.run(nodes, callbacks)
+    try {
+      await this.runner.run(nodes, callbacks)
+    } finally {
+      for (let node of nodes) {
+        node.setState('idle')
+      }
+    }
   }
 
   resetCode(skipThisCallback) {
@@ -144,12 +157,32 @@ class CodeNode {
     }
   }
 
+  setState(state) {
+    const old = this.state
+    this.state = state
+    for (let cb of this.stateChangeCallbacks) {
+      try {
+        cb(this.state, old, this)
+      } catch (e) {
+        console.error(`Error while calling state change callback: ${e}`)
+      }
+    }
+  }
+
   addCodeChangeCallback(callback) {
     this.codeChangeCallbacks.add(callback)
   }
 
   removeCodeChangeCallback(callback) {
     this.codeChangeCallbacks.delete(callback)
+  }
+
+  addStateChangeCallback(callback) {
+    this.stateChangeCallbacks.add(callback)
+  }
+
+  removeStateChangeCallback(callback) {
+    this.stateChangeCallbacks.delete(callback)
   }
 }
 
