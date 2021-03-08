@@ -9,17 +9,27 @@ EditorTemplate.innerHTML = EditorTemplateHtml
 class Editor {
   constructor(container, codeNode) {
     this.codeNode = codeNode
+
     this.state = {
       running: false,
     }
 
-    let codeNodeChangeSkipSetValue = false
+    this.container = container
+
+    this.configCodeNode()
+    this.buildElements()
+    this.update()
+  }
+
+  configCodeNode() {
+    this.codeNodeChangeSkipSetValue = false
     this.handleCodeNodeChange = (code) => {
-      if (!codeNodeChangeSkipSetValue) {
+      if (!this.codeNodeChangeSkipSetValue) {
         this.aceEditor.setValue(code)
       }
       this.update()
     }
+
     this.handleNodeStdout = (data) => {
       if (data === null) {
         for (let element of this.output.querySelectorAll('.stdout')) {
@@ -31,6 +41,7 @@ class Editor {
         span.textContent = data
       }
     }
+
     this.handleNodeStderr = (data) => {
       if (data === null) {
         for (let element of this.output.querySelectorAll('.stderr')) {
@@ -42,11 +53,13 @@ class Editor {
         span.textContent = data
       }
     }
+
     this.codeNode.addCodeChangeCallback(this.handleCodeNodeChange)
     this.codeNode.stdout.subscribe(this.handleNodeStdout)
     this.codeNode.stderr.subscribe(this.handleNodeStderr)
+  }
 
-    this.container = container
+  buildElements() {
     const shadow = this.container.attachShadow({mode: 'open'})
     shadow.appendChild(EditorTemplate.content.cloneNode(true))
 
@@ -60,9 +73,9 @@ class Editor {
       mode: 'ace/mode/python',
     })
     this.aceEditor.on('change', () => {
-      codeNodeChangeSkipSetValue = true
+      this.codeNodeChangeSkipSetValue = true
       this.codeNode.setCode(this.aceEditor.getValue())
-      codeNodeChangeSkipSetValue = false
+      this.codeNodeChangeSkipSetValue = false
     })
     this.aceEditor.commands.addCommand({
       name: 'runcode',
@@ -91,8 +104,6 @@ class Editor {
         this.update({running: false})
       }
     }
-
-    this.update()
   }
 
   update(stateUpdate) {
