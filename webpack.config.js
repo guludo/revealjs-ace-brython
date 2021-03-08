@@ -10,7 +10,7 @@ module.exports = {
     libraryTarget: 'umd',
   },
   devtool: 'eval-source-map',
-   module: {
+  module: {
     rules: [
       {
         test: /\.html$/i,
