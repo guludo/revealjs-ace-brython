@@ -19,6 +19,10 @@ module.exports = {
         test: /\.svg$/i,
         type: 'asset/inline',
       },
+      {
+        test: /\/runner\.py$/,
+        type: 'asset/source',
+      },
     ],
   },
 }
