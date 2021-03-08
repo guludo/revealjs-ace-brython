@@ -9,6 +9,9 @@ EditorTemplate.innerHTML = EditorTemplateHtml
 class Editor {
   constructor(container, codeNode) {
     this.codeNode = codeNode
+    this.state = {
+      running: false,
+    }
 
     let codeNodeChangeSkipSetValue = false
     this.handleCodeNodeChange = (code) => {
@@ -81,21 +84,24 @@ class Editor {
 
     this.runButton = shadow.getElementById('run-button')
     this.runButton.onclick = async () => {
-      this.runButton.disabled = true
-      this.runButton.querySelector('span').textContent = 'Running...'
-      this.root.classList.toggle('running', true)
+      this.update({running: true})
       try {
         await this.codeNode.exec()
       } finally {
-        this.runButton.disabled = false
-        this.runButton.querySelector('span').textContent = 'Run'
-        this.root.classList.toggle('running', false)
+        this.update({running: false})
       }
     }
+
+    this.update()
   }
 
-  update() {
+  update(stateUpdate) {
+    this.state = {...this.state, ...stateUpdate}
+
     this.root.classList.toggle('edited', this.codeNode.code !== this.codeNode.originalCode)
+    this.runButton.disabled = this.state.running
+    this.runButton.querySelector('span').textContent = this.state.running ? 'Running...' : 'Run'
+    this.root.classList.toggle('running', this.state.running)
   }
 
   destroy() {
