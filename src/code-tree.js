@@ -79,6 +79,8 @@ class CodeNode {
     this.parent = parent
     this.code = code ? preprocess(code) : null
     this.originalCode = this.code
+    this.stdout = new Output()
+    this.stderr = new Output()
     this.runner = runner
     this.codeChangeCallbacks = new Set()
   }
@@ -94,7 +96,7 @@ class CodeNode {
     return path
   }
 
-  async exec(stdoutCallback) {
+  async exec() {
     let node = this
     const nodes = []
     while (node) {
@@ -103,14 +105,21 @@ class CodeNode {
     }
     nodes.reverse()
 
-    await this.runner.run(nodes, {
-      stdout: ({codeIdx, data}) => {
-        if (codeIdx === nodes.length - 1) {
-          // Currently, we are just using the output of this node
-          stdoutCallback(data)
-        }
+    for (let node of nodes) {
+      node.stdout.reset()
+      node.stderr.reset()
+    }
+
+    const callbacks = {
+      stdout({codeIdx, data}) {
+        nodes[codeIdx].stdout.push(data)
       },
-    })
+      stderr({codeIdx, data}) {
+        nodes[codeIdx].stderr.push(data)
+      },
+    }
+
+    await this.runner.run(nodes, callbacks)
   }
 
   resetCode(skipThisCallback) {
@@ -141,5 +150,35 @@ class CodeNode {
 
   removeCodeChangeCallback(callback) {
     this.codeChangeCallbacks.delete(callback)
+  }
+}
+
+
+class Output {
+  constructor() {
+    this.data = ''
+    this.subscribers = new Set()
+  }
+
+  reset() {
+    this.data = ''
+    for (let s of this.subscribers) {
+      s(null, this)
+    }
+  }
+
+  push(data) {
+    this.data += data
+    for (let s of this.subscribers) {
+      s(data, this)
+    }
+  }
+
+  subscribe(subscriber) {
+    this.subscribers.add(subscriber)
+  }
+
+  unsubscribe(subscriber) {
+    this.subscribers.delete(subscriber)
   }
 }
