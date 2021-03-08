@@ -17,7 +17,31 @@ class Editor {
       }
       this.update()
     }
+    this.handleNodeStdout = (data) => {
+      if (data === null) {
+        for (let element of this.output.querySelectorAll('.stdout')) {
+          element.remove()
+        }
+      } else {
+        const span = this.output.appendChild(document.createElement('span'))
+        span.className = 'stdout'
+        span.textContent = data
+      }
+    }
+    this.handleNodeStderr = (data) => {
+      if (data === null) {
+        for (let element of this.output.querySelectorAll('.stderr')) {
+          element.remove()
+        }
+      } else {
+        const span = this.output.appendChild(document.createElement('span'))
+        span.className = 'stderr'
+        span.textContent = data
+      }
+    }
     this.codeNode.addCodeChangeCallback(this.handleCodeNodeChange)
+    this.codeNode.stdout.subscribe(this.handleNodeStdout)
+    this.codeNode.stderr.subscribe(this.handleNodeStderr)
 
     this.container = container
     const shadow = this.container.attachShadow({mode: 'open'})
@@ -60,16 +84,13 @@ class Editor {
       this.runButton.disabled = true
       this.runButton.querySelector('span').textContent = 'Running...'
       this.root.classList.toggle('running', true)
-      this.output.textContent = ''
-      const result = await this.codeNode.exec((partialOut) => {
-        if (partialOut == null) {
-          return
-        }
-        this.output.textContent += partialOut
-      })
-      this.runButton.disabled = false
-      this.runButton.querySelector('span').textContent = 'Run'
-      this.root.classList.toggle('running', false)
+      try {
+        await this.codeNode.exec()
+      } finally {
+        this.runButton.disabled = false
+        this.runButton.querySelector('span').textContent = 'Run'
+        this.root.classList.toggle('running', false)
+      }
     }
   }
 
@@ -80,6 +101,8 @@ class Editor {
   destroy() {
     this.aceEditor.destroy()
     this.codeNode.removeCodeChangeCallback(this.handleCodeNodeChange)
+    this.codeNode.stdout.unsubscribe(this.handleNodeStdout)
+    this.codeNode.stderr.unsubscribe(this.handleNodeStderr)
     this.container.innerHTML = ''
     Object.keys(this).forEach(k => delete this[k])
   }
