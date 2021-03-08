@@ -1,10 +1,12 @@
 import preprocess from './preprocessor.js'
+import Runner from './runner.js'
 
 
 class CodeTree {
   constructor(nodes) {
     this.nodeMap = new Map()
     this.nodes = new Array(nodes.length)
+    this.runner = new Runner()
 
     // Construct idToNode and look for repeated ids
     const nodesWithId = nodes.filter(node => node.id)
@@ -58,7 +60,7 @@ class CodeTree {
         [n, i] = stack.pop()
         const parent = n.parent ? this.nodeMap.get(n.parent) : null
         const code = n.code ? n.code : ''
-        this.nodes[i] = new CodeNode(parent, code)
+        this.nodes[i] = new CodeNode(parent, code, this.runner)
         if (n.id) {
           this.nodes[i].id = n.id
           this.nodeMap.set(n.id, this.nodes[i])
@@ -72,11 +74,12 @@ export default CodeTree
 
 
 class CodeNode {
-  constructor(parent, code) {
+  constructor(parent, code, runner) {
     this.id = null
     this.parent = parent
     this.code = code ? preprocess(code) : null
     this.originalCode = this.code
+    this.runner = runner
     this.codeChangeCallbacks = new Set()
   }
 
@@ -92,34 +95,22 @@ class CodeNode {
   }
 
   async exec(stdoutCallback) {
-    if (this.parent) {
-      await this.parent.exec()
+    let node = this
+    const nodes = []
+    while (node) {
+      nodes.push(node)
+      node = node.parent
     }
+    nodes.reverse()
 
-    let stdout = ''
-    let t0 = new Date()
-    // TODO: integrate with brython here
-    await new Promise(resolve => {
-      setTimeout(() => {
-        stdoutCallback('foo\n')
-        stdout += 'foo\n'
-        resolve()
-      }, 1000)
+    await this.runner.run(nodes, {
+      stdout: ({codeIdx, data}) => {
+        if (codeIdx === nodes.length - 1) {
+          // Currently, we are just using the output of this node
+          stdoutCallback(data)
+        }
+      },
     })
-
-    await new Promise(resolve => {
-      setTimeout(() => {
-        stdoutCallback('bar\n')
-        stdout += 'bar\n'
-        stdoutCallback(null)
-        resolve()
-      }, 1000)
-    })
-
-    return {
-      stdout,
-      time: (new Date() - t0) / 1000,
-    }
   }
 
   resetCode(skipThisCallback) {
