@@ -3,6 +3,7 @@ Init script run by brython-runner for revealjs-ace-brython.
 """
 import browser
 import sys
+import traceback
 
 MSG_TYPE_PREFIX = 'revealjs-ace-brython.'
 
@@ -100,16 +101,18 @@ def handle_exec(session_id, codes):
 
             try:
                 exec(code, g)
-            except Exception as e:
+            except:
+                etype, evalue, tb = sys.exc_info()
                 send_msg(
                     'exec-code-error',
                     {
                         'code_idx': code_idx,
                         'session_id': session_id,
-                        'error': str(e),
+                        'error': str(evalue),
                     },
                 )
-                raise e
+                traceback.print_exception(etype, evalue, tb)
+                raise evalue
             else:
                 send_msg(
                     'exec-code-success',
