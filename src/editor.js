@@ -13,9 +13,18 @@ class Editor {
 
     this.container = container
 
+    this.processAttributes()
     this.configCodeNode()
     this.buildElements()
     this.update()
+  }
+
+  processAttributes() {
+    this.state.readonly = false
+    if ('readonly' in this.container.dataset) {
+      const r = this.container.dataset.readonly
+      this.state.readonly = r === '' || r === 'true'
+    }
   }
 
   configCodeNode() {
@@ -109,6 +118,10 @@ class Editor {
     this.state = {...this.state, ...stateUpdate}
 
     const running = this.state.nodeState === 'running'
+
+    this.container.dataset.readonly = this.state.readonly ? 'true' : 'false'
+
+    this.aceEditor.setOption('readOnly', this.state.readonly)
 
     this.root.classList.toggle('edited', this.codeNode.code !== this.codeNode.originalCode)
     this.root.classList.toggle('running', running)
