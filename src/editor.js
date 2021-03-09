@@ -6,6 +6,13 @@ import EditorTemplateHtml from './editor-template.html';
 const EditorTemplate = document.createElement('template')
 EditorTemplate.innerHTML = EditorTemplateHtml
 
+const stateAttributes = {
+  'readonly': {
+    type: 'bool',
+    default: false,
+  }
+}
+
 class Editor {
   constructor(container, codeNode) {
     this.codeNode = codeNode
@@ -13,18 +20,53 @@ class Editor {
 
     this.container = container
 
-    this.processAttributes()
+    this.processInitialAttributes()
     this.configCodeNode()
     this.buildElements()
     this.update()
   }
 
-  processAttributes() {
-    this.state.readonly = false
-    if ('readonly' in this.container.dataset) {
-      const r = this.container.dataset.readonly
-      this.state.readonly = r === '' || r === 'true'
+  processInitialAttributes() {
+    for (let k of Object.keys(stateAttributes)) {
+      const conf = stateAttributes[k]
+      const target = 'target' in conf ? conf.target : k
+      const defaultValue = 'default' in conf ? conf.default : null
+
+      let value = defaultValue
+      if (k in this.container.dataset) {
+        const v = this.container.dataset[k]
+        const type = 'type' in conf ? conf.type : 'string'
+
+        switch (type) {
+        case 'bool':
+          value = v === '' || v === 'true'
+          break
+        case 'string':
+          value = v.toString()
+          break
+        default:
+          throw new Error(`unknown attribute type in configuration: ${type}`)
+        }
+      }
+      this.state[target] = value
     }
+  }
+
+  updateAttributes(state) {
+    for (let k of Object.keys(stateAttributes)) {
+      const conf = stateAttributes[k]
+      const target = 'target' in conf ? conf.target : k
+      let value = state[target]
+      const type = 'type' in conf ? conf.type : 'string'
+
+      switch (type) {
+      case 'bool':
+        value = value ? 'true' : 'false'
+        break
+      }
+      this.container.dataset[k] = value
+    }
+
   }
 
   configCodeNode() {
@@ -117,9 +159,9 @@ class Editor {
   update(stateUpdate) {
     this.state = {...this.state, ...stateUpdate}
 
-    const running = this.state.nodeState === 'running'
+    this.updateAttributes(this.state)
 
-    this.container.dataset.readonly = this.state.readonly ? 'true' : 'false'
+    const running = this.state.nodeState === 'running'
 
     this.aceEditor.setOption('readOnly', this.state.readonly)
 
