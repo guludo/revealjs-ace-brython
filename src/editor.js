@@ -111,9 +111,10 @@ class Editor {
     const running = this.state.nodeState === 'running'
 
     this.root.classList.toggle('edited', this.codeNode.code !== this.codeNode.originalCode)
+    this.root.classList.toggle('running', running)
+
     this.runButton.disabled = running
     this.runButton.querySelector('span').textContent = running ? 'Running...' : 'Run'
-    this.root.classList.toggle('running', running)
   }
 
   destroy() {
