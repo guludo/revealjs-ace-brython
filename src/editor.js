@@ -10,7 +10,11 @@ const stateAttributes = {
   'readonly': {
     type: 'bool',
     default: false,
-  }
+  },
+  'components': {
+    type: 'string',
+    default: 'code buttons output',
+  },
 }
 
 class Editor {
@@ -170,6 +174,11 @@ class Editor {
 
     this.runButton.disabled = running
     this.runButton.querySelector('span').textContent = running ? 'Running...' : 'Run'
+
+    const showComponents = new Set(this.state.components.split(/\s+/))
+    this.root.classList.toggle('code-hidden', !showComponents.has('code'))
+    this.root.classList.toggle('buttons-hidden', !showComponents.has('buttons'))
+    this.root.classList.toggle('output-hidden', !showComponents.has('output'))
   }
 
   destroy() {
