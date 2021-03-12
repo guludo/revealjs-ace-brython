@@ -29,6 +29,20 @@ const stateAttributesFilter = Object.keys(stateAttributes).map(k => {
 })
 
 
+function stateAttributeStrToValue(conf, s) {
+  const type = 'type' in conf ? conf.type : 'string'
+  switch (type) {
+  case 'bool':
+    return s === '' || s === 'true'
+  case 'string':
+    return s.toString()
+    break
+  default:
+    throw new Error(`unknown attribute type in configuration: ${type}`)
+  }
+}
+
+
 class Editor {
   constructor(container, codeNode) {
     this.codeNode = codeNode
@@ -51,18 +65,7 @@ class Editor {
       let value = defaultValue
       if (k in this.container.dataset) {
         const v = this.container.dataset[k]
-        const type = 'type' in conf ? conf.type : 'string'
-
-        switch (type) {
-        case 'bool':
-          value = v === '' || v === 'true'
-          break
-        case 'string':
-          value = v.toString()
-          break
-        default:
-          throw new Error(`unknown attribute type in configuration: ${type}`)
-        }
+        value = stateAttributeStrToValue(conf, this.container.dataset[k])
       }
       this.state[target] = value
     }
@@ -203,7 +206,8 @@ class Editor {
         }
 
         this.handleStateAttributeChange(name, newValue, oldValue)
-        stateMutation[name] = newValue
+        const conf = stateAttributes[name]
+        stateMutation[name] = stateAttributeStrToValue(conf, newValue)
       }
       this.update(stateMutation, {updateAttributes: false})
     })
