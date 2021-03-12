@@ -89,9 +89,9 @@ class Editor {
     switch (attr) {
     case 'lineNumber':
       const cursor = this.aceEditor.selection.getCursor()
-      const newRow = parseInt(newValue) - 1
+      const newRow = parseInt(newValue)
       if (!isNaN(newRow) && 1 <= newRow) {
-        this.aceEditor.navigateTo(newRow, cursor.column)
+        this.aceEditor.gotoLine(newRow, cursor.column, true)
       }
       break
     default:
