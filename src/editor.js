@@ -15,6 +15,10 @@ const stateAttributes = {
     type: 'string',
     default: 'code buttons output',
   },
+  'lineNumber': {
+    type: 'string',
+    default: '1',
+  }
 }
 
 class Editor {
@@ -135,6 +139,12 @@ class Editor {
       this.codeNodeChangeSkipSetValue = true
       this.codeNode.setCode(this.aceEditor.getValue())
       this.codeNodeChangeSkipSetValue = false
+    })
+    this.aceEditor.selection.on('changeCursor', () => {
+      const cursor = this.aceEditor.selection.getCursor()
+      if ((cursor.row + 1) != this.state.lineNumber) {
+        this.update({lineNumber: (cursor.row + 1).toString()})
+      }
     })
     this.aceEditor.commands.addCommand({
       name: 'runcode',
