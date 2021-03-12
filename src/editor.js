@@ -1,5 +1,6 @@
 import ace from 'ace-builds'
 import 'ace-builds/src-noconflict/mode-python.js'
+import 'ace-builds/src-noconflict/theme-pastel_on_dark.js'
 
 import EditorTemplateHtml from './editor-template.html';
 
@@ -158,6 +159,7 @@ class Editor {
     this.aceEditor = ace.edit(this.aceElement, {
       mode: 'ace/mode/python',
       hasCssTransforms: true,
+      theme: 'ace/theme/pastel_on_dark',
     })
     this.aceEditor.on('change', () => {
       this.codeNodeChangeSkipSetValue = true
