@@ -197,6 +197,11 @@ class Editor {
                                     .replace(/-[a-z]/g, s => s.slice(1).toUpperCase())
         const newValue = m.target.getAttribute(m.attributeName)
         const oldValue = m.oldValue
+
+        if (newValue === oldValue) {
+          continue
+        }
+
         this.handleStateAttributeChange(name, newValue, oldValue)
         stateMutation[name] = newValue
       }
