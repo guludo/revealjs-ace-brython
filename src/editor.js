@@ -21,6 +21,14 @@ const stateAttributes = {
   }
 }
 
+
+const stateAttributesFilter = Object.keys(stateAttributes).map(k => {
+  const conf = stateAttributes[k]
+  const target = 'target' in conf ? conf.target : k
+  return 'data-' + target.replace(/[A-Z]/g, c => '-' + c.toLowerCase())
+})
+
+
 class Editor {
   constructor(container, codeNode) {
     this.codeNode = codeNode
@@ -75,6 +83,19 @@ class Editor {
       this.container.dataset[k] = value
     }
 
+  }
+
+  handleStateAttributeChange(attr, newValue, oldValue) {
+    switch (attr) {
+    case 'lineNumber':
+      const cursor = this.aceEditor.selection.getCursor()
+      const newRow = parseInt(newValue) - 1
+      if (!isNaN(newRow) && 1 <= newRow) {
+        this.aceEditor.navigateTo(newRow, cursor.column)
+      }
+      break
+    default:
+    }
   }
 
   configCodeNode() {
@@ -168,12 +189,33 @@ class Editor {
     this.runButton.onclick = () => {
       this.codeNode.exec()
     }
+
+    this.stateAttributeObserver = new MutationObserver((mutations) => {
+      const stateMutation = {}
+      for (let m of mutations) {
+        const name = m.attributeName.slice('data-'.length)
+                                    .replace(/-[a-z]/g, s => s.slice(1).toUpperCase())
+        const newValue = m.target.getAttribute(m.attributeName)
+        const oldValue = m.oldValue
+        this.handleStateAttributeChange(name, newValue, oldValue)
+        stateMutation[name] = newValue
+      }
+      this.update(stateMutation, {updateAttributes: false})
+    })
+    this.stateAttributeObserver.observe(this.container, {
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: stateAttributesFilter,
+    })
   }
 
-  update(stateUpdate) {
+  update(stateUpdate, options) {
+    options = {...{updateAttributes: true}, ...options}
     this.state = {...this.state, ...stateUpdate}
 
-    this.updateAttributes(this.state)
+    if (options.updateAttributes) {
+      this.updateAttributes(this.state)
+    }
 
     const running = this.state.nodeState === 'running'
 
@@ -198,6 +240,7 @@ class Editor {
     this.codeNode.stdout.unsubscribe(this.handleNodeStdout)
     this.codeNode.stderr.unsubscribe(this.handleNodeStderr)
     this.container.innerHTML = ''
+    this.stateAttributeObserver.disconnect()
     Object.keys(this).forEach(k => delete this[k])
   }
 }
