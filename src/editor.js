@@ -19,7 +19,15 @@ const stateAttributes = {
   'lineNumber': {
     type: 'string',
     default: '1',
-  }
+  },
+  'minLines': {
+    type: 'string',
+    default: '1',
+  },
+  'maxLines': {
+    type: 'string',
+    default: '1000',
+  },
 }
 
 
@@ -98,6 +106,14 @@ class Editor {
         this.aceEditor.gotoLine(newRow, cursor.column, true)
       }
       break
+    case 'minLines':
+    case 'maxLines':
+        newValue = parseInt(newValue)
+        if (isNaN(newValue)) {
+          newValue = undefined
+        }
+        this.aceEditor.setOption(attr, newValue)
+        break
     default:
     }
   }
@@ -160,6 +176,10 @@ class Editor {
       mode: 'ace/mode/python',
       hasCssTransforms: true,
       theme: 'ace/theme/pastel_on_dark',
+      minLines: parseInt(this.state.minLines) ?
+                  parseInt(this.state.minLines) : undefined,
+      maxLines: parseInt(this.state.maxLines) ?
+                  parseInt(this.state.maxLines) : undefined,
     })
     this.aceEditor.on('change', () => {
       this.codeNodeChangeSkipSetValue = true
