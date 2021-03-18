@@ -81,11 +81,29 @@ class Plugin {
   }
 
   configureEditor(container) {
-    const scriptElement = container.querySelector(':scope > script[type="text/x.ace-brython"]')
+    const q = container.querySelector.bind(container)
+    const scriptElement = q(':scope > script[type="text/x.ace-brython"]:not([data-prev])')
     if (!scriptElement) {
       return
     }
+
+    let originalCode = null
+    if ('prev' in container.dataset) {
+      const prevId = container.dataset.prev
+      if (!this.codeTree.nodeMap.has(prevId)) {
+        const msg = `container references a non-existing previous code node: "${prevId}"`
+        throw new Error(msg)
+      }
+      originalCode = this.codeTree.nodeMap.get(prevId).originalCode
+    } else {
+      const prevVersionElement = q(':scope > script[type="text/x.ace-brython"][data-prev]')
+      if (prevVersionElement) {
+        const prevNode = this.scriptToCodeNode.get(prevVersionElement)
+        originalCode = prevNode ? prevNode.originalCode : null
+      }
+    }
+
     const node = this.scriptToCodeNode.get(scriptElement)
-    const editor = new Editor(container, node)
+    const editor = new Editor(container, node, originalCode)
   }
 }
