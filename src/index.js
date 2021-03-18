@@ -32,10 +32,6 @@ class Plugin {
     }
     this.config = config
 
-    this.deck.on('ready', this.handleReady.bind(this))
-  }
-
-  handleReady() {
     this.createCodeTree()
     this.editorContainers = [...this.deck.getRevealElement().querySelectorAll(this.config.selector)]
     for (let c of this.editorContainers) {
