@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "ace-builds": "ajaxorg/ace-builds#1.4.12",
-    "brython-runner": "link:brython-runner"
+    "brython-runner": "link:brython-runner",
+    "diff": "^5.0.0"
   }
 }
