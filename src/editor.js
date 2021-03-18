@@ -1,16 +1,23 @@
 import ace from 'ace-builds'
 import 'ace-builds/src-noconflict/mode-python.js'
 import 'ace-builds/src-noconflict/theme-pastel_on_dark.js'
+import { diffLines } from 'diff'
 
 import EditorTemplateHtml from './editor-template.html';
 
 const EditorTemplate = document.createElement('template')
 EditorTemplate.innerHTML = EditorTemplateHtml
 
+window.the_editors = []
+
 const stateAttributes = {
   'readonly': {
     type: 'bool',
     default: false,
+  },
+  'highlightDiff': {
+    type: 'bool',
+    default: true,
   },
   'components': {
     type: 'string',
@@ -53,9 +60,16 @@ function stateAttributeStrToValue(conf, s) {
 
 
 class Editor {
-  constructor(container, codeNode) {
+  constructor(container, codeNode, diffOriginal=null) {
     this.codeNode = codeNode
     this.state = {}
+
+    if (diffOriginal === null) {
+      this.diffOriginal = this.codeNode.originalCode
+    } else {
+      this.diffOriginal = diffOriginal.toString()
+    }
+    this.diffMarkers = new Set()
 
     this.container = container
 
@@ -63,6 +77,7 @@ class Editor {
     this.configCodeNode()
     this.buildElements()
     this.update()
+    this.scheduleDiff()
   }
 
   processInitialAttributes() {
@@ -124,6 +139,7 @@ class Editor {
       if (!this.codeNodeChangeSkipSetValue) {
         this.aceEditor.setValue(code)
       }
+      this.scheduleDiff()
       this.update()
     }
 
@@ -199,6 +215,7 @@ class Editor {
         this.runButton.click()
       },
     })
+    window.the_editors.push(this.aceEditor)
 
 
     this.root = shadow.getElementById('root')
@@ -241,6 +258,7 @@ class Editor {
   }
 
   update(stateUpdate, options) {
+    const old = this.state
     options = {...{updateAttributes: true}, ...options}
     this.state = {...this.state, ...stateUpdate}
 
@@ -262,6 +280,57 @@ class Editor {
     this.root.classList.toggle('code-hidden', !showComponents.has('code'))
     this.root.classList.toggle('buttons-hidden', !showComponents.has('buttons'))
     this.root.classList.toggle('output-hidden', !showComponents.has('output'))
+
+    this.updateDiffMarkers(this.state, old)
+  }
+
+  updateDiffMarkers(state, old) {
+    if (state.highlightDiff) {
+      this.container.classList.toggle('ace-brython-highlight-diff', true)
+      if (state.diff !== old.diff) {
+        for (let id of this.diffMarkers) {
+          this.aceEditor.session.removeMarker(id)
+          this.diffMarkers.delete(id)
+        }
+        if (state.diff) {
+          let head = 0
+          for (let change of state.diff) {
+            if (change.removed) {
+              continue
+            }
+            if (!change.added) {
+              head += change.count
+              continue
+            }
+            let start = head
+            let end = head + change.count - 1
+            let markerId = this.aceEditor.session.highlightLines(start, end).id
+            this.diffMarkers.add(markerId)
+            head += change.count
+          }
+        }
+      }
+    } else {
+      this.container.classList.toggle('ace-brython-highlight-diff', false)
+      for (let id in this.diffMarkers) {
+        this.aceEditor.session.removeMarker(id)
+        this.diffMarkers.delete(id)
+      }
+    }
+  }
+
+  scheduleDiff() {
+    if (this.state.highlightDiff) {
+      clearTimeout(this.diffTimeoutId)
+      // Let's wait for the user to stop typing and save some CPU
+      this.diffTimeoutId = setTimeout(() => {
+        let diff = null
+        if (this.diffOriginal !== this.codeNode.code) {
+          diff = diffLines(this.diffOriginal, this.codeNode.code)
+        }
+        this.update({diff})
+      }, 400)
+    }
   }
 
   destroy() {
