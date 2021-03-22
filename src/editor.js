@@ -202,12 +202,13 @@ class Editor {
       this.codeNode.setCode(this.aceEditor.getValue())
       this.codeNodeChangeSkipSetValue = false
     })
-    this.aceEditor.selection.on('changeCursor', () => {
-      const cursor = this.aceEditor.selection.getCursor()
-      if ((cursor.row + 1).toString() !== this.state.lineNumber) {
-        this.update({lineNumber: (cursor.row + 1).toString()})
-      }
-    })
+    // FIXME: this keeps user from selecting. Commented out for now.
+    //this.aceEditor.selection.on('changeCursor', () => {
+    //  const cursor = this.aceEditor.selection.getCursor()
+    //  if ((cursor.row + 1).toString() !== this.state.lineNumber) {
+    //    this.update({lineNumber: (cursor.row + 1).toString()})
+    //  }
+    //})
     this.aceEditor.commands.addCommand({
       name: 'runcode',
       bindKey: {win: 'Ctrl-Enter',  mac: 'Command-Enter'},
