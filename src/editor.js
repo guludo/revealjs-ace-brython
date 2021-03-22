@@ -204,7 +204,7 @@ class Editor {
     })
     this.aceEditor.selection.on('changeCursor', () => {
       const cursor = this.aceEditor.selection.getCursor()
-      if ((cursor.row + 1) != this.state.lineNumber) {
+      if ((cursor.row + 1).toString() !== this.state.lineNumber) {
         this.update({lineNumber: (cursor.row + 1).toString()})
       }
     })
